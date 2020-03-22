@@ -1,0 +1,7 @@
+*.har
+*.log
+*.log.*
+*.sh
+*.bat
+.idea/
+.DS_Store

@@ -1,0 +1,4 @@
+com/perf/logonoff/PerfEUM.class
+com/perf/logonoff/MyThread.class
+com/perf/logonoff/LogonAndOff.class
+com/perf/logonoff/OsUtils.class
