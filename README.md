@@ -20,3 +20,7 @@ java -jar DBB-jar-with-dependencies.jar <No of execution> <delay before next pag
 |7|username|| 
 |8|password||
 |9|code||  
+
+#Development
+Rebuild
+mvn clean package
