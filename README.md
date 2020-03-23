@@ -22,5 +22,5 @@ java -jar DBB-jar-with-dependencies.jar <No of execution> <delay before next pag
 |9|code||  
 
 # Development
-Rebuild
+Rebuild command  
 mvn clean package
