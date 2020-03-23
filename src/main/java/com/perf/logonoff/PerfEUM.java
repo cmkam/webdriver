@@ -49,11 +49,6 @@ class MyThread extends Thread{
 
 
     public void run(){
-        if (proxyPeriod==-1) {
-            logonAndOff.initDriver();
-        }
-
-
         if (iteration == -1) iteration = Integer.MAX_VALUE;
         System.out.println("iteration=" + iteration);
         logger.info("iteration={}",iteration);
@@ -75,13 +70,12 @@ class MyThread extends Thread{
                         i%proxyPeriod==0 || (i+1)%proxyPeriod==0){
                     logonAndOff.setUseProxy(true);
                     logonAndOff.setProxy(getProxyServer());
-                    logonAndOff.initDriver();
                 }else{
                     logonAndOff.setUseProxy(false);
                     logonAndOff.setProxy(null);
-                    logonAndOff.initDriver();
                 }
             }
+            logonAndOff.initDriver();
 
             String now = null;
             if (finishTime!=null) {
@@ -117,11 +111,6 @@ class MyThread extends Thread{
 
             logonAndOff.sleep(sleepSecond);
 
-            if (proxyPeriod!=-1) {
-                logonAndOff.quit();
-            }
-        }
-        if (proxyPeriod==-1) {
             logonAndOff.quit();
         }
     }
@@ -143,6 +132,7 @@ public class PerfEUM {
     private static Logger logger = LoggerFactory.getLogger(PerfEUM.class);
     public static void main(String[] args) throws ParseException {
         int iteration = Integer.parseInt(args[0]);
+
         int sleepSecond = Integer.parseInt(args[1]);
 
         boolean headLess = Boolean.parseBoolean(args[2]);
