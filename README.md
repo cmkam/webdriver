@@ -5,7 +5,7 @@ Download and install JAVA 1.8 if you did not install.
 ```console
 java -jar DBB-jar-with-dependencies.jar <No of execution> <delay before next page> <hidden mode>
 <No of execution between Har file generation> <Time for auto shutdown, HHMM> 
-<url1> <<url2> <username> <password> <code> 
+<url1> <url2> <username> <password> <code> 
 ```
 
 |no|arg|comment|
