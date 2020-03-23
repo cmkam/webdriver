@@ -67,15 +67,20 @@ class MyThread extends Thread{
             }
 
 
-            if (    proxyPeriod!=-1 && ( i <= 2 ||
-                    i%proxyPeriod==0 || (i+1)%proxyPeriod==0)){
-                logonAndOff.setUseProxy(true);
-                logonAndOff.setProxy(getProxyServer());
-                logonAndOff.initDriver();
-            }else{
+            if (proxyPeriod == -1){
                 logonAndOff.setUseProxy(false);
                 logonAndOff.setProxy(null);
-                logonAndOff.initDriver();
+            }else{
+                if (  i <= 2 ||
+                        i%proxyPeriod==0 || (i+1)%proxyPeriod==0){
+                    logonAndOff.setUseProxy(true);
+                    logonAndOff.setProxy(getProxyServer());
+                    logonAndOff.initDriver();
+                }else{
+                    logonAndOff.setUseProxy(false);
+                    logonAndOff.setProxy(null);
+                    logonAndOff.initDriver();
+                }
             }
 
             String now = null;
