@@ -25,7 +25,9 @@ import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -52,13 +54,15 @@ public class LogonAndOff {
     private String url;
     private BrowserMobProxy proxy;
     private boolean useProxy;
+    private int pageLoadTimeout;
 
-    public void initSetup(String url1, String url2, String username, String password, String securityCode) {
+    public void initSetup(String url1, String url2, String username, String password, String securityCode, int pageLoadTimeout) {
         this.url1 = url1;
         this.url2 = url2;
         this.username= username;
         this.password=password;
         this.securityCode = securityCode;
+        this.pageLoadTimeout = pageLoadTimeout;
     }
 
     public void setUseProxy(boolean useProxy){
@@ -170,9 +174,7 @@ public class LogonAndOff {
 
         driver = new ChromeDriver(chromeOptions);
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-
-
-
+        driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
     }
 
     public void initFirefox() {
@@ -249,7 +251,15 @@ public class LogonAndOff {
         //String userAgent = (String) ((JavascriptExecutor) driver).executeScript("return navigator.userAgent;");
 
         if (proxy!=null){
-            proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
+            //proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
+            proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS,
+                    CaptureType.REQUEST_CONTENT,
+                    CaptureType.REQUEST_BINARY_CONTENT,
+                    CaptureType.REQUEST_COOKIES,
+                    CaptureType.RESPONSE_HEADERS,
+                    CaptureType.RESPONSE_CONTENT,
+                    CaptureType.RESPONSE_BINARY_CONTENT,
+                    CaptureType.RESPONSE_COOKIES);
             proxy.newHar();
             driver.get(url);
         }

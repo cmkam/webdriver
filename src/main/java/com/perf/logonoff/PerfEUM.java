@@ -8,6 +8,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.Perf;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -51,7 +52,7 @@ class MyThread extends Thread{
     public void run(){
         if (iteration == -1) iteration = Integer.MAX_VALUE;
         System.out.println("iteration=" + iteration);
-        logger.info("iteration={}",iteration);
+        logger.info("Count={}",iteration);
 
         for(int i=1; i<=iteration; i++){
             logonAndOff.setId(i);
@@ -61,6 +62,8 @@ class MyThread extends Thread{
                 logonAndOff.setUrl(LogonAndOff.url2);
             }
 
+            perfLog.info("[START]{}|{}|{}|",
+                    logonAndOff.getBrowserType(),logonAndOff.getDisplayUrl(), ""+i);
 
             if (proxyPeriod == -1){
                 logonAndOff.setUseProxy(false);
@@ -89,8 +92,6 @@ class MyThread extends Thread{
 
             }
 
-            logger.info("[START]{}| Test EUM for url={},count={}",
-                    logonAndOff.getBrowserType(), logonAndOff.getDisplayUrl(), ""+i);
 
             try{
                 logonAndOff.logon();
@@ -130,7 +131,9 @@ class MyThread extends Thread{
 
 public class PerfEUM {
     private static Logger logger = LoggerFactory.getLogger(PerfEUM.class);
+    private static Logger perfLog = LoggerFactory.getLogger("dbb.PERF");
     public static void main(String[] args) throws ParseException {
+        perfLog.info("Version:{}",PerfEUM.class.getPackage().getImplementationVersion());
         int iteration = Integer.parseInt(args[0]);
 
         int sleepSecond = Integer.parseInt(args[1]);
@@ -146,8 +149,13 @@ public class PerfEUM {
 
         logger.info("URL[{}]\r\n[{}]", args[5], args[6]);
 
+        int pageLoadTimeout = 60;// default to 60s
+        if (args.length>10){
+            pageLoadTimeout = Integer.parseInt(args[10]);
+        }
+
         MyThread t1 = new MyThread("chrome", iteration, sleepSecond, headLess, proxyPeriod, finishTime);
-        t1.logonAndOff.initSetup(args[5], args[6], args[7], args[8], args[9]);
+        t1.logonAndOff.initSetup(args[5], args[6], args[7], args[8], args[9], pageLoadTimeout);
         t1.start();
 
         //MyThread t2 = new MyThread("firefox", iteration);
