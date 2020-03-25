@@ -55,14 +55,16 @@ public class LogonAndOff {
     private BrowserMobProxy proxy;
     private boolean useProxy;
     private int pageLoadTimeout;
+    private int loginDelay;
 
-    public void initSetup(String url1, String url2, String username, String password, String securityCode, int pageLoadTimeout) {
+    public void initSetup(String url1, String url2, String username, String password, String securityCode, int pageLoadTimeout, int loginDelay) {
         this.url1 = url1;
         this.url2 = url2;
         this.username= username;
         this.password=password;
         this.securityCode = securityCode;
         this.pageLoadTimeout = pageLoadTimeout;
+        this.loginDelay = loginDelay;
     }
 
     public void setUseProxy(boolean useProxy){
@@ -276,7 +278,7 @@ public class LogonAndOff {
         driver.findElement(By.id("security-code")).sendKeys(securityCode);
         sleep(1);
         driver.findElement(By.xpath("//*[text()='Log on']")).click();
-        sleep(10);
+        sleep(loginDelay);
 
         if (proxy ==null){
             harFileName = null;
@@ -292,6 +294,10 @@ public class LogonAndOff {
                 har.writeTo(harFile);
             } catch (IOException e) {
                 e.printStackTrace();
+                logger.error("Err ",e);
+            } catch (Exception e){
+                e.printStackTrace();
+                logger.error("Err ",e);
             }
 //   List<HarEntry> entries = proxy.getHar().getLog().getEntries();
 //            for(HarEntry entry :entries){
@@ -301,15 +307,13 @@ public class LogonAndOff {
 
         try {
             skipQuickTour();
+            if (driver.getTitle().equals("Business Internet Banking")) {
+                logger.info("[" + browserType + "]: Logon OK.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            logger.error("Err ",e);
         }
-        if (driver.getTitle().equals("Business Internet Banking")) {
-            logger.info("[" + browserType + "]: Logon OK.");
-        }
-
-
-
     }
 
     public void skipQuickTour() {

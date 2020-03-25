@@ -154,8 +154,13 @@ public class PerfEUM {
             pageLoadTimeout = Integer.parseInt(args[10]);
         }
 
+        int loginDelay = 60;// default to 60s
+        if (args.length>11){
+            loginDelay = Integer.parseInt(args[11]);
+        }
+
         MyThread t1 = new MyThread("chrome", iteration, sleepSecond, headLess, proxyPeriod, finishTime);
-        t1.logonAndOff.initSetup(args[5], args[6], args[7], args[8], args[9], pageLoadTimeout);
+        t1.logonAndOff.initSetup(args[5], args[6], args[7], args[8], args[9], pageLoadTimeout, loginDelay);
         t1.start();
 
         //MyThread t2 = new MyThread("firefox", iteration);
