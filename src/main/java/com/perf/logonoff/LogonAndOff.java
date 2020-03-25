@@ -105,7 +105,7 @@ public class LogonAndOff {
                 logonAndOff.logon();
                 logonAndOff.logOff();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("err",e);
                 if (!logonAndOff.isDriverAlive()) {
                     logonAndOff.initDriver();
                 }
@@ -293,10 +293,8 @@ public class LogonAndOff {
 
                 har.writeTo(harFile);
             } catch (IOException e) {
-                e.printStackTrace();
                 logger.error("Err ",e);
             } catch (Exception e){
-                e.printStackTrace();
                 logger.error("Err ",e);
             }
 //   List<HarEntry> entries = proxy.getHar().getLog().getEntries();
@@ -311,7 +309,6 @@ public class LogonAndOff {
                 logger.info("[" + browserType + "]: Logon OK.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Err ",e);
         }
     }
@@ -353,7 +350,7 @@ public class LogonAndOff {
             Thread.sleep(seconds * 1000);
             //Thread.sleep(seconds * 0);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("err",e);
         }
     }
 

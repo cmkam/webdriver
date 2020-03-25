@@ -104,7 +104,7 @@ class MyThread extends Thread{
 
                 logonAndOff.logOff();
             } catch (Exception e){
-                e.printStackTrace();
+                logger.error("err",e);
                 if(!logonAndOff.isDriverAlive()){
                     logonAndOff.initDriver();
                 }
