@@ -149,12 +149,12 @@ public class PerfEUM {
 
         logger.info("URL[{}]\r\n[{}]", args[5], args[6]);
 
-        int pageLoadTimeout = 60;// default to 60s
+        int pageLoadTimeout = 120;// default to 60s
         if (args.length>10){
             pageLoadTimeout = Integer.parseInt(args[10]);
         }
 
-        int loginDelay = 60;// default to 60s
+        int loginDelay = 0;// default to 0s
         if (args.length>11){
             loginDelay = Integer.parseInt(args[11]);
         }

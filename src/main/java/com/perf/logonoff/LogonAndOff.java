@@ -16,6 +16,8 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,7 +177,7 @@ public class LogonAndOff {
         }
 
         driver = new ChromeDriver(chromeOptions);
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
     }
 
@@ -227,6 +229,19 @@ public class LogonAndOff {
     }
 
     public void logon() {
+        if (proxy!=null){
+            //proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
+            proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS,
+                    CaptureType.REQUEST_CONTENT,
+                    CaptureType.REQUEST_BINARY_CONTENT,
+                    CaptureType.REQUEST_COOKIES,
+                    CaptureType.RESPONSE_HEADERS,
+                    CaptureType.RESPONSE_CONTENT,
+                    CaptureType.RESPONSE_BINARY_CONTENT,
+                    CaptureType.RESPONSE_COOKIES);
+            proxy.newHar();
+        }
+
         driver.get(url);
 
         dbbServerName="NA";
@@ -252,33 +267,35 @@ public class LogonAndOff {
         }
         //String userAgent = (String) ((JavascriptExecutor) driver).executeScript("return navigator.userAgent;");
 
-        if (proxy!=null){
-            //proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
-            proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS,
-                    CaptureType.REQUEST_CONTENT,
-                    CaptureType.REQUEST_BINARY_CONTENT,
-                    CaptureType.REQUEST_COOKIES,
-                    CaptureType.RESPONSE_HEADERS,
-                    CaptureType.RESPONSE_CONTENT,
-                    CaptureType.RESPONSE_BINARY_CONTENT,
-                    CaptureType.RESPONSE_COOKIES);
-            proxy.newHar();
-            driver.get(url);
-        }
+
         System.out.println(new Date()+";"+url+",dbbServerName="+dbbServerName);
-        sleep(5);
 
-        driver.findElement(By.id("userName")).sendKeys(username);
-        sleep(1);
-        driver.findElement(By.xpath("//*[text()='Next']")).click();
-        sleep(3);
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 120);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("userName")));
 
+            driver.findElement(By.id("userName")).sendKeys(username);
+        }
 
-        driver.findElement(By.id("password")).sendKeys(password);
-        driver.findElement(By.id("security-code")).sendKeys(securityCode);
-        sleep(1);
-        driver.findElement(By.xpath("//*[text()='Log on']")).click();
-        sleep(loginDelay);
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 120);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Next']")));
+
+            driver.findElement(By.xpath("//*[text()='Next']")).click();
+        }
+
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 120);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
+            driver.findElement(By.id("password")).sendKeys(password);
+            driver.findElement(By.id("security-code")).sendKeys(securityCode);
+        }
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 120);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Log on']")));
+            driver.findElement(By.xpath("//*[text()='Log on']")).click();
+            sleep(loginDelay);
+        }
 
         if (proxy ==null){
             harFileName = null;
@@ -315,16 +332,25 @@ public class LogonAndOff {
 
     public void skipQuickTour() {
 //        if (driver.getPageSource().contains("Would you like a 1 minute quick tour")){
-        if (driver.getPageSource().split("Would you like a 1 minute quick tour").length == 5) {
-            // occurred 4 times
-            driver.findElements(By.xpath("//*[text() = 'No, please skip.']")).get(1).click();
-            sleep(1);
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 120);
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("main")));
+            //wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("account-box ng-scope")));
+            if (driver.getPageSource().split("Would you like a 1 minute quick tour").length == 5) {
+                // occurred 4 times
+                driver.findElements(By.xpath("//*[text() = 'No, please skip.']")).get(1).click();
+               // sleep(1);
+            }
         }
-//        if(driver.getPageSource().contains("Show quick tour again next time I log on")) {
-        if (driver.getPageSource().split("Show quick tour again next time I log on").length == 5) {
-            // occurred 4 times
-            driver.findElements(By.xpath("//button[@data-analytics-event-content='quick tour - step 6 - complete']")).get(1).click();
-            sleep(1);
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            sleep(2);
+            if (driver.getPageSource().split("Show quick tour again next time I log on").length == 5) {
+                // occurred 4 times
+                driver.findElements(By.xpath("//button[@data-analytics-event-content='quick tour - step 6 - complete']")).get(1).click();
+                sleep(1);
+            }
         }
     }
 
