@@ -175,7 +175,7 @@ public class LogonAndOff {
         ChromeDriver cdriver = new ChromeDriver(chromeOptions);
         cdriver.manage().timeouts().implicitlyWait(240, TimeUnit.SECONDS);
         cdriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
-        slowChrome(cdriver);
+        //slowChrome(cdriver);
         driver = cdriver;
     }
 
@@ -245,7 +245,7 @@ public class LogonAndOff {
         return harFileName;
     }
 
-    public void logon() {
+    public double logon() {
 
         if (proxy!=null){
             //proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
@@ -309,11 +309,14 @@ public class LogonAndOff {
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("security-code")));
             driver.findElement(By.id("security-code")).sendKeys(securityCode);
         }
+        long beforeLogonTime;
         {
             WebDriverWait wait = new WebDriverWait(driver, 120);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Log on']")));
-            driver.findElement(By.xpath("//*[text()='Log on']")).click();
             sleep(loginDelay);
+            driver.findElement(By.xpath("//*[text()='Log on']")).click();
+            beforeLogonTime = System.currentTimeMillis();;
+
         }
 
 
@@ -327,13 +330,16 @@ public class LogonAndOff {
             logger.error("Err ",e);
         }
 
+        double timeUsedForLogon;
         {
             WebDriverWait wait = new WebDriverWait(driver, 120);
             wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@class='account-row ng-scope other']")));
+            timeUsedForLogon = ((double)(System.currentTimeMillis() - beforeLogonTime))/1000;
+
             captureHAR();
         }
 
-
+        return timeUsedForLogon;
     }
 
     private void captureHAR(){
@@ -344,7 +350,7 @@ public class LogonAndOff {
                 Har har = proxy.getHar();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
                 harFileName = LocalDateTime.now().format(formatter) + "_"+id+"_"+getDisplayUrl()+"_"+dbbServerName+".har";
-                File harFile = new File(harFileName);
+                File harFile = new File("log/"+harFileName);
                 //harFile.mkdirs();
                 harFile.createNewFile();
 

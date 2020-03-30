@@ -94,13 +94,13 @@ class MyThread extends Thread{
 
 
             try{
-                logonAndOff.logon();
+                double timeUsedForLogon = logonAndOff.logon();
 
-                perfLog.info("[END]{}|{}|{}| S={}, H={} {} {}",
+                perfLog.info("[END]{}|{}|{}| S={}, H={} {} {} logonTime={}",
                         logonAndOff.getBrowserType(),logonAndOff.getDisplayUrl(), ""+i,
                         logonAndOff.getDbbServerName(),logonAndOff.getHarFileName(),
                         (finishTime==null?"":",finishTime="+finishTime),
-                        (now==null?"":",now="+ now ));
+                        (now==null?"":",now="+ now ), timeUsedForLogon);
 
                 logonAndOff.logOff();
             } catch (Exception e){
@@ -154,7 +154,7 @@ public class PerfEUM {
             pageLoadTimeout = Integer.parseInt(args[10]);
         }
 
-        int loginDelay = 0;// default to 0s
+        int loginDelay = 1;// default to 0s
         if (args.length>11){
             loginDelay = Integer.parseInt(args[11]);
         }
