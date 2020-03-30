@@ -1,5 +1,6 @@
 package com.perf.logonoff;
 
+import com.google.common.collect.ImmutableMap;
 import net.lightbody.bmp.BrowserMobProxy;
 import net.lightbody.bmp.client.ClientUtil;
 import net.lightbody.bmp.core.har.Har;
@@ -14,8 +15,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -27,10 +27,7 @@ import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -167,7 +164,6 @@ public class LogonAndOff {
 //            chromeOptions.addArguments("user-agent=\""+agent+"\"");
 //        }
 
-
  //       boolean headLess = false;
         if (headLess) {
             chromeOptions.setHeadless(true);
@@ -176,9 +172,30 @@ public class LogonAndOff {
             chromeOptions.addArguments("--start-maximized");
         }
 
-        driver = new ChromeDriver(chromeOptions);
-        driver.manage().timeouts().implicitlyWait(120, TimeUnit.SECONDS);
-        driver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+        ChromeDriver cdriver = new ChromeDriver(chromeOptions);
+        cdriver.manage().timeouts().implicitlyWait(240, TimeUnit.SECONDS);
+        cdriver.manage().timeouts().pageLoadTimeout(pageLoadTimeout, TimeUnit.SECONDS);
+        slowChrome(cdriver);
+        driver = cdriver;
+    }
+
+    private void slowChrome(ChromeDriver cdriver){
+        CommandExecutor executor = cdriver.getCommandExecutor();
+
+        Map map = new HashMap();
+        map.put("offline", false);
+        map.put("latency", 5);
+
+        map.put("download_throughput", 25600);
+        map.put("upload_throughput", 51200);
+        try {
+            Response response = executor.execute(
+                    new Command(cdriver.getSessionId(),
+                            "setNetworkConditions",
+                            ImmutableMap.of("network_conditions", ImmutableMap.copyOf(map))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void initFirefox() {
@@ -229,6 +246,7 @@ public class LogonAndOff {
     }
 
     public void logon() {
+
         if (proxy!=null){
             //proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
             proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS,
@@ -288,6 +306,7 @@ public class LogonAndOff {
             WebDriverWait wait = new WebDriverWait(driver, 120);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
             driver.findElement(By.id("password")).sendKeys(password);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("security-code")));
             driver.findElement(By.id("security-code")).sendKeys(securityCode);
         }
         {
@@ -297,6 +316,27 @@ public class LogonAndOff {
             sleep(loginDelay);
         }
 
+
+
+        try {
+            skipQuickTour();
+            if (driver.getTitle().equals("Business Internet Banking")) {
+                logger.info("[" + browserType + "]: Logon OK.");
+            }
+        } catch (Exception e) {
+            logger.error("Err ",e);
+        }
+
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 120);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@class='account-row ng-scope other']")));
+            captureHAR();
+        }
+
+
+    }
+
+    private void captureHAR(){
         if (proxy ==null){
             harFileName = null;
         }else{
@@ -319,15 +359,6 @@ public class LogonAndOff {
 //                System.out.println(entry.getRequest().getUrl());
 //            }
         }
-
-        try {
-            skipQuickTour();
-            if (driver.getTitle().equals("Business Internet Banking")) {
-                logger.info("[" + browserType + "]: Logon OK.");
-            }
-        } catch (Exception e) {
-            logger.error("Err ",e);
-        }
     }
 
     public void skipQuickTour() {
@@ -335,7 +366,7 @@ public class LogonAndOff {
         {
             WebDriverWait wait = new WebDriverWait(driver, 120);
 
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("main")));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@class='introjs-tooltiptext ng-scope']")));
             //wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("account-box ng-scope")));
             if (driver.getPageSource().split("Would you like a 1 minute quick tour").length == 5) {
                 // occurred 4 times
@@ -343,14 +374,17 @@ public class LogonAndOff {
                // sleep(1);
             }
         }
+
         {
-            WebDriverWait wait = new WebDriverWait(driver, 10);
+            WebDriverWait wait = new WebDriverWait(driver, 120);
             sleep(2);
-            if (driver.getPageSource().split("Show quick tour again next time I log on").length == 5) {
+
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@class='introjs-tooltiptext ng-scope']")));
+            //if (driver.getPageSource().split("Show quick tour again next time I log on").length == 5) {
                 // occurred 4 times
+            //driver.findElement(By.xpath("//button[@class='btn btn-primary ng-isolate-scope']")).click();
                 driver.findElements(By.xpath("//button[@data-analytics-event-content='quick tour - step 6 - complete']")).get(1).click();
-                sleep(1);
-            }
+            //}
         }
     }
 
