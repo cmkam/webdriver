@@ -104,9 +104,9 @@ class MyThread extends Thread{
 
                 logonAndOff.logOff();
             } catch (Exception e){
-                logger.error("err",e);
-                if(!logonAndOff.isDriverAlive()){
-                    logonAndOff.initDriver();
+                logger.error("Timeout Error",e);
+                if(logonAndOff.isDriverAlive()) {
+                    logonAndOff.quit();
                 }
             }
 

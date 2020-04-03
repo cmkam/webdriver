@@ -289,21 +289,21 @@ public class LogonAndOff {
         System.out.println(new Date()+";"+url+",dbbServerName="+dbbServerName);
 
         {
-            WebDriverWait wait = new WebDriverWait(driver, 120);
+            WebDriverWait wait = new WebDriverWait(driver, pageLoadTimeout);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("userName")));
 
             driver.findElement(By.id("userName")).sendKeys(username);
         }
 
         {
-            WebDriverWait wait = new WebDriverWait(driver, 120);
+            WebDriverWait wait = new WebDriverWait(driver, pageLoadTimeout);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Next']")));
 
             driver.findElement(By.xpath("//*[text()='Next']")).click();
         }
 
         {
-            WebDriverWait wait = new WebDriverWait(driver, 120);
+            WebDriverWait wait = new WebDriverWait(driver, pageLoadTimeout);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password")));
             driver.findElement(By.id("password")).sendKeys(password);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("security-code")));
@@ -311,7 +311,7 @@ public class LogonAndOff {
         }
         long beforeLogonTime;
         {
-            WebDriverWait wait = new WebDriverWait(driver, 120);
+            WebDriverWait wait = new WebDriverWait(driver, pageLoadTimeout);
             wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='Log on']")));
             sleep(loginDelay);
             driver.findElement(By.xpath("//*[text()='Log on']")).click();
@@ -332,7 +332,7 @@ public class LogonAndOff {
 
         double timeUsedForLogon;
         {
-            WebDriverWait wait = new WebDriverWait(driver, 120);
+            WebDriverWait wait = new WebDriverWait(driver, pageLoadTimeout);
             wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@class='account-row ng-scope other']")));
             timeUsedForLogon = ((double)(System.currentTimeMillis() - beforeLogonTime))/1000;
 
